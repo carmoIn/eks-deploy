@@ -24,11 +24,13 @@ kind: Service
 metadata:
   name: frontend-service
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    external-dns.alpha.kubernetes.io/hostname: gajigo.tk
+    external-dns.alpha.kubernetes.io/ttl: "120" #optional
 spec:
   selector:
     component: frontend
   ports:
-    - port: 80
+    - protocol: TCP
+      port: 80
       targetPort: 3000
   type: LoadBalancer

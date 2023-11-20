@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: geoserver-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: geoserver
+  template:
+    metadata:
+      labels:
+        component: geoserver
+    spec:
+      containers:
+      - name: geoserver
+        image: kartoza/geoserver:2.24.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: GEOSERVER_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: geoserver-secrets
+              key: GEOSERVER_ADMIN_PASSWORD
+        - name: GEOSERVER_ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: geoserver-secrets
+              key: GEOSERVER_ADMIN_USER
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: geoserver-service
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: geoserver.gajigo.tk
+    external-dns.alpha.kubernetes.io/ttl: "120" #optional
+spec:
+  selector:
+    component: geoserver
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer
